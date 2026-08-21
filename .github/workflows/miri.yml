@@ -1,1 +1,24 @@
+name: Miri
 
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  miri:
+    name: cargo miri test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri
+      - run: cargo miri test -p hatp-types
+        env:
+          MIRIFLAGS: "-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-check-number-validity"
+      - run: cargo miri test -p hatp-engine -- bloom key_index row_codec wal manifest
+        env:
+          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-check-number-validity"
