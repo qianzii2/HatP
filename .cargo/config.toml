@@ -1,0 +1,23 @@
+# ============================================================================
+# CARGO TEST CONFIGURATION
+# ============================================================================
+# Limit test parallelism to prevent OOM from too many concurrent tests.
+# Default is number of CPU cores, which can cause memory exhaustion.
+# Set to half of available cores for safer resource usage.
+#
+# Override with: cargo test -- --test-threads=1
+# Or: RUST_TEST_THREADS=1 cargo test
+# ============================================================================
+
+[build]
+# Keep incremental compilation for faster rebuilds during development
+incremental = true
+
+# Limit jobs to prevent memory exhaustion during compilation
+# Each Rust compilation unit uses ~200-500MB of RAM
+# Set to 4 to leave memory headroom for tests
+jobs = 4
+
+[test]
+# Limit test parallelism. Use RUST_TEST_THREADS env var to override.
+# Setting to 2 is safer for memory-constrained environments.
