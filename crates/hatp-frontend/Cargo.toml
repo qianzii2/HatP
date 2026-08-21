@@ -1,0 +1,67 @@
+[package]
+name        = "hatp-frontend"
+version     = "0.1.0"
+edition     = "2024"
+rust-version = "1.85"
+license     = "Apache-2.0"
+description = "HatP frontend — DataFusion integration, catalog, DDL, planner hooks."
+
+[lints]
+# 手动复制 workspace lints，仅覆盖 unsafe_code 为 allow。
+[lints.rust]
+unsafe_code                         = "allow"
+missing_debug_implementations       = "warn"
+rust_2018_idioms                    = { level = "warn", priority = -1 }
+unexpected_cfgs                     = "allow"
+
+[lints.clippy]
+unwrap_used               = "deny"
+expect_used               = "deny"
+panic                     = "deny"
+todo                      = "deny"
+unimplemented             = "deny"
+indexing_slicing          = "deny"
+unwrap_or_default         = "deny"
+missing_panics_doc        = "warn"
+module_name_repetitions   = "allow"
+
+[dependencies]
+hatp-engine    = { path = "../hatp-engine" }
+hatp-tx        = { path = "../hatp-tx" }
+hatp-types     = { path = "../hatp-types" }
+
+datafusion         = { workspace = true }
+datafusion-common  = { workspace = true }
+datafusion-expr    = { workspace = true }
+datafusion-physical-expr = { workspace = true }
+datafusion-physical-plan = { workspace = true }
+datafusion-optimizer = { workspace = true }
+datafusion-catalog = { workspace = true }
+datafusion-session = { workspace = true }
+datafusion-sql     = { workspace = true }
+datafusion-datasource = { workspace = true }
+
+arrow         = { workspace = true }
+arrow-array   = { workspace = true }
+arrow-schema  = { workspace = true }
+arrow-select  = { workspace = true }
+
+thiserror    = { workspace = true }
+tracing      = { workspace = true }
+tracing-subscriber = { workspace = true }
+parking_lot  = { workspace = true }
+bytes        = { workspace = true }
+async-trait  = { workspace = true }
+time         = { workspace = true }
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+futures      = { workspace = true }
+tokio        = { workspace = true }
+
+[dev-dependencies]
+# `futures::executor::block_on` is used in unit tests for the
+# TableProvider adapter sanity checks.
+arrow-array  = { workspace = true }
+arrow-schema = { workspace = true }
+datafusion   = { workspace = true }
+tempfile     = "3"

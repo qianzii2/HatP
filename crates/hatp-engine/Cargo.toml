@@ -1,0 +1,107 @@
+[package]
+name         = "hatp-engine"
+version      = "0.1.0"
+edition      = "2024"
+rust-version = "1.85"
+license      = "Apache-2.0"
+description  = "HatP engine — LSM, WAL, MemTable, MVCC, and compaction."
+
+# lints 无法使用 `workspace = true` 然后仅覆盖 `unsafe_code`：
+# Cargo 在 `workspace = true` 时不允许 `[lints.rust]` 局部覆盖。
+# 因此这里手动复制 workspace lints，仅将 `unsafe_code` 改为 `allow`。
+# 当 workspace lints 变更时，需同步更新此处。
+[lints.rust]
+# Allow unsafe in this crate only; the workspace denies by default.
+# The custom binary WAL encoder/decoder, SIMD CRC32C, and lock-free
+# memtable path all need `unsafe` to call platform intrinsics and to
+# skip bounds checks on hot paths.
+unsafe_code                         = "allow"
+missing_debug_implementations       = "warn"
+rust_2018_idioms                    = { level = "warn", priority = -1 }
+unexpected_cfgs                     = "allow"
+
+[lints.clippy]
+unwrap_used               = "deny"
+expect_used               = "deny"
+panic                     = "deny"
+todo                      = "deny"
+unimplemented             = "deny"
+indexing_slicing          = "deny"
+unwrap_or_default         = "deny"
+missing_panics_doc        = "warn"
+module_name_repetitions   = "allow"
+
+[features]
+default = []
+uring = ["dep:tokio-uring"]
+
+[dependencies]
+hatp-types  = { path = "../hatp-types" }
+bytes         = { workspace = true }
+parking_lot   = { workspace = true }
+arc-swap      = { workspace = true }
+crossbeam-skiplist = { workspace = true }
+rayon              = { workspace = true }
+smallvec           = { workspace = true }
+memmap2            = { workspace = true }
+thiserror     = { workspace = true }
+tokio         = { workspace = true }
+tokio-stream  = { workspace = true }
+futures       = { workspace = true }
+tracing       = { workspace = true }
+
+# Arrow runtime (row codec + RecordBatch construction). No Arrow IPC anymore:
+# Arrow runtime (row codec + RecordBatch construction). No Arrow IPC anymore:
+# the manifest is a binary log and row payloads use the compact row codec, so
+# the aggregate `arrow` crate is not needed — only the -array/-schema pieces.
+arrow-array  = { workspace = true }
+arrow-schema = { workspace = true }
+# `filter_record_batch` for the vectorized UPDATE/DELETE filter path.
+arrow-select = { workspace = true }
+
+# Table schema registry persistence (`hatp.schemas` sidecar, JSON via serde).
+serde        = { workspace = true }
+serde_json   = { workspace = true }
+
+# DataFusion only for `ScalarValue` (used in `ColumnPredicate::Eq.value` and
+# `row_codec::decode_row_values` via `ScalarValue::iter_to_array`).
+# All DataFusion-aware DML planning lives in `hatp-frontend`.
+datafusion-common  = { workspace = true }
+
+# Vortex file layout for SSTs (replaces the v4 self-rolled Arrow IPC SST).
+vortex        = { workspace = true, features = ["tokio"] }
+vortex-array  = { workspace = true }
+vortex-buffer = { workspace = true }
+vortex-file   = { workspace = true }
+vortex-io     = { workspace = true }
+vortex-scan   = { workspace = true }
+vortex-layout = { workspace = true }
+vortex-mask   = { workspace = true }
+vortex-session = { workspace = true }
+vortex-error  = { workspace = true }
+vortex-arrow  = { workspace = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+tokio-uring = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile = "3"
+# Integration tests construct RecordBatch inputs directly (no Expr).
+arrow-array  = { workspace = true }
+arrow-schema = { workspace = true }
+# Property-based testing (P0 gap: PK encoding, VersionChain, etc.)
+proptest = { version = "1", features = ["std"] }
+# Benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+# Loom concurrency testing
+loom = "0.7"
+
+[[bench]]
+name = "lsm_bench"
+harness = false
+
+# Loom concurrency tests require custom harness
+[[test]]
+name = "loom_tests"
+path = "tests/loom/loom_tests.rs"
+harness = false

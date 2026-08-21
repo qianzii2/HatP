@@ -1,0 +1,204 @@
+[workspace]
+resolver = "2"
+# HatP sub-crates:
+# - hatp: top-level facade (Database / Transaction)
+# - hatp-frontend: DataFusion + Vortex + Arrow integration
+# - hatp-engine: OLTP write path (MVCC KV + Vortex SST + WAL)
+# - hatp-tx: transaction state machine + EngineHook
+# - hatp-types: shared types, codecs, and hashing
+members = [
+    "crates/hatp-types",
+    "crates/hatp",
+    "crates/hatp-frontend",
+    "crates/hatp-engine",
+    "crates/hatp-tx",
+]
+
+[workspace.package]
+version       = "0.1.0"
+edition       = "2024"
+rust-version  = "1.85"
+license       = "Apache-2.0"
+
+# ============================================================================
+# PROFILE DESIGN
+# ============================================================================
+# Production profiles: dev is slow+safe (debug assertions, overflow checks),
+# release is fast (no debug assertions, no overflow checks, LTO).
+# The `kani` and `fuzz` profiles inherit dev and disable debug assertions
+# for Kani/miri/formal-verification use cases.
+# ============================================================================
+
+[profile.dev]
+debug-assertions = true
+overflow-checks  = true
+opt-level        = 0
+
+[profile.dev.package."*"]
+debug-assertions = false
+opt-level        = 3
+
+# Test profile inherits dev but with better optimization and resource limits.
+[profile.test]
+debug-assertions = false
+overflow-checks  = true
+opt-level        = 3
+# Limit memory per test: prevents runaway allocations from causing OOM.
+# Set to 2GB; individual tests should stay well under this.
+# Enable by running: cargo test --profile test
+# Or set RUST_MIN_STACK=16777216 (16MB) for per-thread stack limit.
+
+[profile.release]
+debug-assertions = false
+overflow-checks  = false
+opt-level        = 3
+lto              = "fat"
+codegen-units    = 1
+strip            = "symbols"
+# `panic = "abort"` would make `std::panic::catch_unwind` a no-op.
+# The engine wraps user-supplied hook callbacks (on_put, on_delete,
+# on_tx_commit, pre-commit validation, compaction iteration) in
+# catch_unwind so a panic in hook code does NOT take down the entire
+# process.  Switching to "unwind" keeps that safety net active in
+# release builds at negligible runtime cost.
+panic            = "unwind"
+
+[workspace.metadata.dylint]
+libraries = []
+
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
+# Only what the workspace actually references. Anything else is purged.
+# ============================================================================
+
+[workspace.dependencies]
+# Async runtime
+tokio              = { version = "1.41", features = ["rt-multi-thread", "macros", "sync", "fs", "time", "io-util"] }
+tokio-stream       = { version = "0.1", features = ["sync"] }
+futures            = "0.3"
+async-trait        = "0.1"
+
+# Tracing
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+
+# Concurrency primitives
+parking_lot        = "0.12"
+# Stack-allocated small vector (VersionChain hot path: 99% of keys have ≤4 versions)
+smallvec           = "1"
+# Lock-free read of the manifest version set (R-22: read path without locks)
+arc-swap           = "1"
+# Lock-free concurrent map for the skiplist memtable backend (PR 2.3)
+crossbeam-skiplist = "0.1"
+# Data-parallel sub-compaction (PR 2.6)
+rayon              = "1.10"
+# Memory-mapped file I/O — zero-copy SST and sidecar reads (PR 6.0)
+memmap2            = "0.9"
+
+# Byte buffers / serialization
+bytes              = "1.7"
+
+# Error handling
+thiserror          = "1.0"
+
+# Time
+time               = { version = "0.3", features = ["formatting", "macros", "serde"] }
+
+# Test utilities
+tempfile           = "3"
+
+# Arrow 58.x (DataFusion 54.x and Vortex 0.83 both pin arrow 58)
+arrow              = { version = "=58.4.0", default-features = false, features = ["csv", "ipc", "prettyprint"] }
+arrow-array        = "=58.4.0"
+arrow-schema       = { version = "=58.4.0", features = ["serde"] }
+arrow-buffer       = "=58.4.0"
+arrow-cast         = "=58.4.0"
+arrow-select       = "=58.4.0"
+arrow-ipc          = "=58.4.0"
+
+# DataFusion 54.x
+datafusion         = "=54.1.0"
+datafusion-common  = "=54.1.0"
+datafusion-expr    = "=54.1.0"
+datafusion-physical-expr = "=54.1.0"
+datafusion-physical-plan = "=54.1.0"
+datafusion-execution = "=54.1.0"
+datafusion-optimizer = "=54.1.0"
+datafusion-catalog = "=54.1.0"
+datafusion-catalog-listing = "=54.1.0"
+datafusion-datasource = "=54.1.0"
+datafusion-datasource-arrow = "=54.1.0"
+datafusion-datasource-csv = "=54.1.0"
+datafusion-datasource-json = "=54.1.0"
+datafusion-datasource-parquet = "=54.1.0"
+datafusion-functions = "=54.1.0"
+datafusion-functions-aggregate = "=54.1.0"
+datafusion-functions-window = "=54.1.0"
+datafusion-session = "=54.1.0"
+datafusion-sql     = "=54.1.0"
+
+# Vortex 0.83 (Windows-compatible IO line)
+vortex             = "=0.83.0"
+vortex-array       = "=0.83.0"
+vortex-buffer      = "=0.83.0"
+vortex-file        = "=0.83.0"
+vortex-scan        = "=0.83.0"
+vortex-layout      = "=0.83.0"
+vortex-io          = "=0.83.0"
+vortex-mask        = "=0.83.0"
+vortex-session     = "=0.83.0"
+vortex-utils       = "=0.83.0"
+vortex-error       = "=0.83.0"
+vortex-compute     = "=0.83.0"
+vortex-encoding    = "=0.83.0"
+vortex-flatbuffers = "=0.83.0"
+vortex-metrics     = "=0.83.0"
+vortex-proto       = "=0.83.0"
+vortex-row         = "=0.83.0"
+vortex-tensor      = "=0.83.0"
+vortex-ipc         = "=0.83.0"
+vortex-json        = "=0.83.0"
+vortex-arrow       = "=0.83.0"
+
+# Interactive CLI
+rustyline          = "14.0"
+
+# Serialization for catalog / config
+serde              = { version = "1.0", features = ["derive"] }
+serde_json         = "1.0"
+
+# Optional io_uring (Linux only) — feature-gated to keep the default build safe
+tokio-uring        = "0.5"
+
+# ============================================================================
+# Workspace-wide lints. Sub-crates opt in via `[lints] workspace = true`.
+#
+# Deny-level lints are the enforced correctness invariants. The `warn`
+# level keeps `cargo clippy` clean (zero warnings) so regressions are
+# visible. Three lints are deliberately NOT enabled here:
+#   - `missing_const_for_fn`: fires on most accessors returning `Bytes` /
+#     `SchemaRef` / `Arc`, which cannot be `const`; pure noise for this API.
+#   - `missing_errors_doc`: error semantics are documented on the `*Error`
+#     enums, so per-function `# Errors` sections are redundant here.
+#   - `needless_pass_by_value`: taking `Arc` / owned handles by value is an
+#     intentional API choice (the caller owns the handle and decides whether
+#     to clone), so the lint misfires on the public facade.
+# ============================================================================
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unexpected_cfgs = "allow"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+indexing_slicing = "deny"
+unwrap_or_default = "deny"
+missing_panics_doc = "warn"
+module_name_repetitions = "allow"

@@ -1,0 +1,38 @@
+[package]
+name        = "hatp-tx"
+version     = "0.1.0"
+edition     = "2024"
+rust-version = "1.85"
+license     = "Apache-2.0"
+description = "HatP transaction layer — single-writer state machine + EngineHook."
+
+[lints]
+# 手动复制 workspace lints，仅覆盖 unsafe_code 为 allow。
+[lints.rust]
+unsafe_code                         = "allow"
+missing_debug_implementations       = "warn"
+rust_2018_idioms                    = { level = "warn", priority = -1 }
+unexpected_cfgs                     = "allow"
+
+[lints.clippy]
+unwrap_used               = "deny"
+expect_used               = "deny"
+panic                     = "deny"
+todo                      = "deny"
+unimplemented             = "deny"
+indexing_slicing          = "deny"
+unwrap_or_default         = "deny"
+missing_panics_doc        = "warn"
+module_name_repetitions   = "allow"
+
+[dependencies]
+hatp-engine  = { path = "../hatp-engine" }
+hatp-types   = { path = "../hatp-types" }
+
+thiserror   = { workspace = true }
+tracing     = { workspace = true }
+parking_lot = { workspace = true }
+bytes       = { workspace = true }
+
+[dev-dependencies]
+tracing-subscriber = { workspace = true }
