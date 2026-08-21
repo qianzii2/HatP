@@ -17,7 +17,7 @@ jobs:
           toolchain: nightly
           components: rust-src
       - run: rustup override set nightly
-      - run: RUSTFLAGS="-Zsanitizer=thread" cargo test -p hatp-engine -- --test-threads=1
+      - run: RUSTFLAGS="-Zsanitizer=thread -Cunsafe-allow-abi-mismatch=sanitizer" cargo test -p hatp-engine -- --test-threads=1
 
   asan:
     name: AddressSanitizer
@@ -29,7 +29,7 @@ jobs:
           toolchain: nightly
           components: rust-src
       - run: rustup override set nightly
-      - run: RUSTFLAGS="-Zsanitizer=address" cargo test -p hatp-engine
+      - run: RUSTFLAGS="-Zsanitizer=address -Cunsafe-allow-abi-mismatch=sanitizer" cargo test -p hatp-engine
 
   careful:
     name: cargo-careful
