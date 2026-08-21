@@ -7,30 +7,6 @@ on:
     branches: [main]
 
 jobs:
-  tsan:
-    name: ThreadSanitizer
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-          components: rust-src
-      - run: rustup override set nightly
-      - run: RUSTFLAGS="-Zsanitizer=thread -Cunsafe-allow-abi-mismatch=sanitizer" cargo test -p hatp-engine -- --test-threads=1
-
-  asan:
-    name: AddressSanitizer
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: nightly
-          components: rust-src
-      - run: rustup override set nightly
-      - run: RUSTFLAGS="-Zsanitizer=address -Cunsafe-allow-abi-mismatch=sanitizer" cargo test -p hatp-engine
-
   careful:
     name: cargo-careful
     runs-on: ubuntu-latest

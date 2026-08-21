@@ -21,6 +21,6 @@ jobs:
       - run: cargo miri test -p hatp-types
         env:
           MIRIFLAGS: "-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check"
-      - run: cargo miri test -p hatp-engine -- bloom row_codec wal manifest
+      - run: cargo miri test -p hatp-engine -- bloom:: row_codec:: wal:: manifest::
         env:
           MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check"
