@@ -12,11 +12,9 @@ allow = [
     "Apache-2.0 WITH LLVM-exception",
     "BSD-3-Clause",
     "BSD-2-Clause",
-    "Unicode-DFS-2016",
     "Unicode-3.0",
     "0BSD",
     "ISC",
-    "OpenSSL",
     "Zlib",
     "CC0-1.0",
     "BSL-1.0",
@@ -32,6 +30,7 @@ skip = [
     { name = "syn", version = "1" },
     { name = "hashbrown", version = "0.14" },
     { name = "indexmap", version = "1" },
+    { name = "block-buffer", version = "0.10" },
 ]
 
 [sources]
