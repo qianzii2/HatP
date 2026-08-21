@@ -765,7 +765,7 @@ fn open_append(path: &Path, valid_bytes: u64) -> Result<File> {
 /// the append handle separately.
 #[cfg(not(windows))]
 fn reset_append_handle(_path: &Path, file_mutex: &Mutex<File>) -> Result<()> {
-    let file = file_mutex.lock();
+    let mut file = file_mutex.lock();
     file.set_len(0)?;
     file.seek(SeekFrom::Start(0))?;
     file.sync_data()?;
