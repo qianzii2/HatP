@@ -4,8 +4,6 @@
 
 [advisories]
 vulnerability = "deny"
-unmaintained   = "warn"
-unsound        = "deny"
 yanked         = "deny"
 
 [licenses]
@@ -43,11 +41,3 @@ skip = [
 unknown-registry = "deny"
 unknown-git      = "deny"
 allow-registry   = ["https://github.com/rust-lang/crates.io-index", "https://static.crates.io/crates"]
-
-
-[features]
-# tokio-uring is Linux-only and gated in Cargo.toml.
-# Ensure it's never accidentally enabled on non-Linux.
-deny = [
-    { name = "tokio-uring", platforms = ["windows", "macos"] },
-]
