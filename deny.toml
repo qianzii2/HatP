@@ -3,6 +3,10 @@
 
 [advisories]
 version = 2
+ignore = [
+    # RUSTSEC-2024-0436: paste is unmaintained, transitive dep of vortex-fastlanes
+    "RUSTSEC-2024-0436",
+]
 
 [licenses]
 version = 2
@@ -23,18 +27,32 @@ allow = [
 
 [bans]
 multiple-versions = "deny"
-wildcards         = "deny"
+# path dependencies look like wildcards to cargo-deny; allow them
+wildcards = "allow"
 # Unavoidable duplicate versions in the DataFusion/Arrow/Vortex ecosystem.
 skip = [
-    { name = "bit-vec", version = "0.8" },
     { name = "syn", version = "1" },
+    { name = "syn", version = "2" },
     { name = "hashbrown", version = "0.14" },
-    { name = "indexmap", version = "1" },
+    { name = "hashbrown", version = "0.15" },
+    { name = "hashbrown", version = "0.16" },
     { name = "block-buffer", version = "0.10" },
     { name = "crypto-common", version = "0.1" },
+    { name = "digest", version = "0.10" },
+    { name = "foldhash", version = "0.1" },
+    { name = "getrandom", version = "0.2" },
+    { name = "getrandom", version = "0.3" },
+    { name = "itertools", version = "0.13" },
+    { name = "r-efi", version = "5" },
+    { name = "rand", version = "0.9" },
+    { name = "rand_core", version = "0.6" },
+    { name = "rand_core", version = "0.9" },
+    { name = "shlex", version = "1" },
+    { name = "thiserror", version = "1" },
+    { name = "thiserror-impl", version = "1" },
 ]
 
 [sources]
 unknown-registry = "deny"
 unknown-git      = "deny"
-allow-registry   = ["https://github.com/rust-lang/crates.io-index", "https://static.crates.io/crates"]
+allow-registry   = ["https://github.com/rust-lang/crates.io-index"]
