@@ -16,6 +16,7 @@ jobs:
         with:
           toolchain: nightly
           components: rust-src
+      - run: rustup override set nightly
       - run: RUSTFLAGS="-Zsanitizer=thread" cargo test -p hatp-engine -- --test-threads=1
 
   asan:
@@ -27,6 +28,7 @@ jobs:
         with:
           toolchain: nightly
           components: rust-src
+      - run: rustup override set nightly
       - run: RUSTFLAGS="-Zsanitizer=address" cargo test -p hatp-engine
 
   careful:
@@ -38,6 +40,7 @@ jobs:
         with:
           toolchain: nightly
           components: rust-src
+      - run: rustup override set nightly
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-careful

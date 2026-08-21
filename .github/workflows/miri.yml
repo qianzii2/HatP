@@ -17,6 +17,7 @@ jobs:
         with:
           toolchain: nightly
           components: miri, rust-src
+      - run: rustup override set nightly
       - run: cargo miri test -p hatp-types
         env:
           MIRIFLAGS: "-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check"
