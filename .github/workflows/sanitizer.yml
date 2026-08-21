@@ -12,8 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly
           components: rust-src
       - run: RUSTFLAGS="-Zsanitizer=thread" cargo test -p hatp-engine -- --test-threads=1
 
@@ -22,8 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly
           components: rust-src
       - run: RUSTFLAGS="-Zsanitizer=address" cargo test -p hatp-engine
 
@@ -32,8 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly
           components: rust-src
       - uses: taiki-e/install-action@v2
         with:
