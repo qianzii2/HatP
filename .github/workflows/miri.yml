@@ -15,10 +15,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          components: miri
+          components: miri, rust-src
       - run: cargo miri test -p hatp-types
         env:
-          MIRIFLAGS: "-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-check-number-validity"
+          MIRIFLAGS: "-Zmiri-strict-provenance -Zmiri-symbolic-alignment-check"
       - run: cargo miri test -p hatp-engine -- bloom key_index row_codec wal manifest
         env:
-          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check -Zmiri-check-number-validity"
+          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-strict-provenance -Zmiri-symbolic-alignment-check"
