@@ -31,6 +31,7 @@ skip = [
     { name = "hashbrown", version = "0.14" },
     { name = "indexmap", version = "1" },
     { name = "block-buffer", version = "0.10" },
+    { name = "crypto-common", version = "0.1" },
 ]
 
 [sources]
